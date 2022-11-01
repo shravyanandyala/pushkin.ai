@@ -8,9 +8,11 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import regularizers
+from tensorflow.keras.callbacks import ModelCheckpoint
+import os
 
 # Reading the text data file
-data = open('russian_5000.txt', encoding="utf8").read()
+data = open('russian_6k.txt', encoding="utf8").read()
 
 # Generating the corpus by
 # splitting the text into lines
@@ -22,8 +24,6 @@ tokenizer.fit_on_texts(corpus)
 
 # Vocabulary count of the corpus
 total_words = len(tokenizer.word_index)
-
-print("Total Words:", total_words)
 
 # Converting the text into embeddings
 input_sequences = []
@@ -41,6 +41,11 @@ input_sequences = np.array(pad_sequences(input_sequences,
 predictors, label = input_sequences[:, :-1], input_sequences[:, -1]
 label = ku.to_categorical(label, num_classes=total_words+1)
 
+x_val = predictors[-1000:]
+y_val = label[-1000:]
+x_train = predictors[:-1000]
+y_train = label[:-1000]
+
 # Building a Bi-Directional LSTM Model
 model = Sequential()
 model.add(Embedding(total_words+1, 100,
@@ -55,7 +60,9 @@ model.compile(loss='categorical_crossentropy',
 			optimizer='adam', metrics=['accuracy'])
 print(model.summary())
 
-history = model.fit(predictors, label, epochs=150, verbose=1)
+history = model.fit(x_train, y_train, epochs=1, verbose=1, validation_data=(x_val, y_val))
+
+model.save('./my_model')
 
 seed_texts= ["Ночь, улица, фонарь, аптека,", "Я вас любил: любовь еще, быть может,", "Как грустно и все же как хочется жить,", "Двадцать первое. Ночь. Понедельник.", "Утра"]
 next_words = 25
