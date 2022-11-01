@@ -60,7 +60,7 @@ model.compile(loss='categorical_crossentropy',
 			optimizer='adam', metrics=['accuracy'])
 print(model.summary())
 
-history = model.fit(x_train, y_train, epochs=1, verbose=1, validation_data=(x_val, y_val))
+history = model.fit(x_train, y_train, epochs=100, verbose=1, validation_data=(x_val, y_val))
 
 model.save('./my_model')
 
